@@ -10,6 +10,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      workbox: {
+        // Tăng giới hạn dung lượng file được phép cache lên 4MB để tránh lỗi build khi file bundle lớn
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      },
       manifest: {
         name: 'Hệ thống Quản lý Nhà Hàng Hương Biển',
         short_name: 'Hương Biển',
