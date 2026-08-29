@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import Login from './pages/login';
+import Login from './pages/Login';
 import StaffDashboard from './pages/StaffDashboard';
 import KitchenDashboard from './pages/KitchenDashboard';
 import AdminDashboard from './pages/AdminDashboard';
