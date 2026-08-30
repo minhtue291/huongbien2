@@ -10,7 +10,7 @@ export default function App() {
   const { user } = useAuth();
   const isAuthenticated = Boolean(user?.phone);
 
-  const getDashboardByRole = () => {
+  const renderDashboard = () => {
     if (!isAuthenticated) return <Login />;
     if (user.role === 'staff' || user.role === 'employee') return <StaffDashboard />;
     if (user.role === 'kitchen') return <KitchenDashboard />;
@@ -21,48 +21,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Đường dẫn gốc / sẽ trực tiếp hiển thị Dashboard nếu đã đăng nhập hoặc Login nếu chưa */}
-        <Route path="/" element={getDashboardByRole()} />
-
-        {/* Giữ lại route /login dự phòng */}
-        <Route 
-          path="/login" 
-          element={
-            !isAuthenticated ? (
-              <Login />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
-        />
-        
-        <Route 
-          path="/staff" 
-          element={
-            isAuthenticated && (user.role === 'staff' || user.role === 'employee') 
-              ? <StaffDashboard /> 
-              : <Navigate to="/" replace />
-          } 
-        />
-        
-        <Route 
-          path="/kitchen" 
-          element={
-            isAuthenticated && user.role === 'kitchen' 
-              ? <KitchenDashboard /> 
-              : <Navigate to="/" replace />
-          } 
-        />
-        
-        <Route 
-          path="/admin" 
-          element={
-            isAuthenticated && user.role === 'admin' 
-              ? <AdminDashboard /> 
-              : <Navigate to="/" replace />
-          } 
-        />
-
+        {/* Mọi thứ đều hiển thị trực tiếp trên URL gốc / giúp PWA khóa chặt không bị bật thanh Safari */}
+        <Route path="/" element={renderDashboard()} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
