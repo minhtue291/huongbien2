@@ -10,28 +10,28 @@ export default function App() {
   const { user } = useAuth();
   const isAuthenticated = Boolean(user?.phone);
 
-  const getDefaultRoute = () => {
-    if (!isAuthenticated) return '/login';
-    if (user.role === 'staff' || user.role === 'employee') return '/staff';
-    return `/${user.role}`;
+  const getDashboardByRole = () => {
+    if (!isAuthenticated) return <Login />;
+    if (user.role === 'staff' || user.role === 'employee') return <StaffDashboard />;
+    if (user.role === 'kitchen') return <KitchenDashboard />;
+    if (user.role === 'admin') return <AdminDashboard />;
+    return <Login />;
   };
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Thêm Route cho đường dẫn gốc để tự động điều hướng */}
-        <Route 
-          path="/" 
-          element={<Navigate to={getDefaultRoute()} replace />} 
-        />
+        {/* Đường dẫn gốc / sẽ trực tiếp hiển thị Dashboard nếu đã đăng nhập hoặc Login nếu chưa */}
+        <Route path="/" element={getDashboardByRole()} />
 
+        {/* Giữ lại route /login dự phòng */}
         <Route 
           path="/login" 
           element={
             !isAuthenticated ? (
               <Login />
             ) : (
-              <Navigate to={getDefaultRoute()} replace />
+              <Navigate to="/" replace />
             )
           } 
         />
@@ -41,7 +41,7 @@ export default function App() {
           element={
             isAuthenticated && (user.role === 'staff' || user.role === 'employee') 
               ? <StaffDashboard /> 
-              : <Navigate to="/login" replace />
+              : <Navigate to="/" replace />
           } 
         />
         
@@ -50,7 +50,7 @@ export default function App() {
           element={
             isAuthenticated && user.role === 'kitchen' 
               ? <KitchenDashboard /> 
-              : <Navigate to="/login" replace />
+              : <Navigate to="/" replace />
           } 
         />
         
@@ -59,7 +59,7 @@ export default function App() {
           element={
             isAuthenticated && user.role === 'admin' 
               ? <AdminDashboard /> 
-              : <Navigate to="/login" replace />
+              : <Navigate to="/" replace />
           } 
         />
 

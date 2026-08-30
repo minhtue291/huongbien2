@@ -55,7 +55,7 @@ export default function Login() {
     <div className="flex justify-center items-center min-h-screen bg-slate-100 p-4">
       <Card className="w-full max-w-md shadow-lg rounded-2xl border-0">
         <div className="text-center mb-6">
-          <Title level={3} className="text-blue-600 m-0">🌊 Hương Biển POS</Title>
+          <Title level={3} className="text-blue-600 m-0">Hương Biển</Title>
           <Text type="secondary">Đăng nhập hệ thống quản lý</Text>
         </div>
         
