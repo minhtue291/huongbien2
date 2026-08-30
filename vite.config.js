@@ -15,9 +15,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
       manifest: {
-        name: 'Hệ thống Quản lý Nhà Hàng Hương Biển',
-        short_name: 'Hương Biển',
-        description: 'Ứng dụng quản lý nhà hàng và bán hàng',
+        name: 'Hương Biển',
+        short_name: 'HB',
         theme_color: '#0284c7',
         background_color: '#f1f5f9',
         display: 'standalone',
