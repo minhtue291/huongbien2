@@ -466,6 +466,118 @@ export default function StaffDashboard() {
     printWindow.document.close();
   };
 
+  // Hàm in đơn cho bếp (Chỉ in các món mới chưa in)
+  const handlePrintNewKitchenOrder = async () => {
+    if (!selectedTable) return;
+    const tableId = selectedTable.id;
+    const currentCart = orderItems[tableId] || [];
+    
+    // Lọc ra các món chưa in bếp
+    const newItemsToPrint = currentCart.filter(item => !item.isPrinted);
+    
+    if (newItemsToPrint.length === 0) {
+      message.warning('Không có món mới nào cần in thêm!');
+      return;
+    }
+
+    const tableNote = tableNotes[tableId];
+    const creatorName = selectedTable.staffName || user?.name || 'Nhân viên';
+    const orderTime = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+    const printWindow = window.open('', '_blank', 'width=350,height=500');
+    if (!printWindow) {
+      message.error('Vui lòng cho phép trình duyệt mở pop-up để in!');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>PHIẾU BẾP (MÓN MỚI) - ${selectedTable.name}</title>
+          <style>
+              body { font-family: monospace; font-size: 13px; margin: 0; padding: 5px; width: 280px; }
+              .center { text-align: center; }
+              .bold { font-weight: bold; }
+              .title { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+              .divider { border-top: 1px dashed #000; margin: 6px 0; }
+              .info div { margin-bottom: 2px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+              th, td { text-align: left; padding: 3px 0; font-size: 13px; }
+              th { border-bottom: 1px solid #000; }
+              td { border-bottom: 1px dotted #ccc; vertical-align: top; }
+              .item-note { font-size: 11px; font-style: italic; color: #444; }
+              .note-box { margin-top: 6px; padding: 4px; border: 1px dashed #000; font-size: 12px; }
+          </style>
+      </head>
+      <body>
+          <div class="center">
+              <div class="title">PHIẾU BẾP (BỔ SUNG)</div>
+              <div class="bold" style="font-size: 15px;">${selectedTable.name}</div>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="info">
+              <div><strong>Giờ:</strong> ${orderTime} | <strong>NV:</strong> ${creatorName}</div>
+          </div>
+
+          <table>
+              <thead>
+                  <tr>
+                      <th style="width: 75%;">Món</th>
+                      <th style="width: 25%; text-align: right;">SL</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  ${newItemsToPrint.map(item => `
+                      <tr>
+                          <td>
+                              <span class="bold">${item.name}</span>
+                              ${item.note ? `<br/><span class="item-note">Lưu ý: ${item.note}</span>` : ''}
+                          </td>
+                          <td style="text-align: right;" class="bold">${item.quantity}</td>
+                      </tr>
+                  `).join('')}
+              </tbody>
+          </table>
+
+          ${tableNote ? `
+              <div class="note-box">
+                  <strong>Ghi chú bàn:</strong> ${tableNote}
+              </div>
+          ` : ''}
+
+          <script>
+              window.onload = function() { window.print(); window.close(); }
+          </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+
+    // Sau khi in thành công, cập nhật trạng thái các món này thành isPrinted: true
+    const updatedCart = currentCart.map(item => ({
+      ...item,
+      isPrinted: true
+    }));
+
+    const newOrderItems = { ...orderItems, [tableId]: updatedCart };
+    setOrderItems(newOrderItems);
+
+    try {
+      const tableDocRef = doc(db, 'tables', tableId);
+      await updateDoc(tableDocRef, {
+        cart: updatedCart
+      });
+      message.success(`Đã gửi in ${newItemsToPrint.length} món mới xuống bếp!`);
+    } catch (error) {
+      console.error("Lỗi cập nhật trạng thái in lên Firebase:", error);
+    }
+  };
+
   const currentTableCart = selectedTable ? (orderItems[selectedTable.id] || []) : [];
   const totalAmount = currentTableCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const currentTableNote = selectedTable ? (tableNotes[selectedTable.id] || '') : '';
@@ -513,7 +625,8 @@ export default function StaffDashboard() {
             currentStaffName={user?.name}
             tableNote={currentTableNote}
             onUpdateTableNote={handleUpdateTableNote}
-            onPrintKitchen={handlePrintKitchenOrder}
+            // onPrintKitchen={handlePrintKitchenOrder}
+            onPrintKitchen={handlePrintNewKitchenOrder}
           />
         ) : currentTab === 'tables' ? (
           <StaffTable
