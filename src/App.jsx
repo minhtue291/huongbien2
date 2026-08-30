@@ -8,18 +8,30 @@ import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   const { user } = useAuth();
-  const isAuthenticated = Boolean(user.phone);
+  const isAuthenticated = Boolean(user?.phone);
+
+  const getDefaultRoute = () => {
+    if (!isAuthenticated) return '/login';
+    if (user.role === 'staff' || user.role === 'employee') return '/staff';
+    return `/${user.role}`;
+  };
 
   return (
     <BrowserRouter>
       <Routes>
+        {/* Thêm Route cho đường dẫn gốc để tự động điều hướng */}
+        <Route 
+          path="/" 
+          element={<Navigate to={getDefaultRoute()} replace />} 
+        />
+
         <Route 
           path="/login" 
           element={
             !isAuthenticated ? (
               <Login />
             ) : (
-              <Navigate to={`/${user.role === 'employee' ? 'staff' : user.role}`} replace />
+              <Navigate to={getDefaultRoute()} replace />
             )
           } 
         />
@@ -51,7 +63,7 @@ export default function App() {
           } 
         />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
